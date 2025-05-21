@@ -41,7 +41,7 @@ dependencies = [
 ]
 
 [project.urls]
-# Homepage = "https://github.com/tbd"
+Homepage = "https://github.com/pdoup/EncDec.git"
 
 [project.scripts]
 folder-encryptor = "folder_encryptor.main:run_main"
