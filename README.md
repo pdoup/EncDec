@@ -58,6 +58,13 @@ Install the wheel with:
 pip install dist/generated_file.whl # replace with actual .whl filename
 ```
 
+### Run program without installation
+
+The `folder-encryptor` can also run as a standalone application without building via `run.py` script:
+```bash
+python run.py target_dir/ encrypt # e.g., to encrypt target_dir
+```
+
 ## Basic Usage
 
 ```bash
@@ -69,7 +76,32 @@ folder-encryptor "/path/to/your/folder" decrypt --key "my_secret.key"
 
 # View all options
 folder-encryptor --help
+
+# Output
+usage: FolderEncryptor [-h] [--key KEY] [--exclude EXCLUDE] [--no-purge-after-decrypt] [--no-backup] [--min-folder-size SIZE]
+                       [--max-file-size SIZE] [--workers WORKERS] [-q] [--restore-from-backup] [-v]
+                       folder {encrypt,decrypt}
+
+Securely encrypts or decrypts a folder's contents.
+
+positional arguments:
+  folder                    Target folder for encryption or decryption.
+  {encrypt,decrypt}         Operation mode.
+
+options:
+  -h, --help                show this help message and exit
+  --key KEY                 Path to the key file (default: secret.key).
+  --exclude EXCLUDE         Comma-separated file extensions to exclude (e.g., .log,.tmp). Case-insensitive.
+  --no-purge-after-decrypt  If set, keeps backup folders and map files after successful decryption.
+  --no-backup               If set, disables creation of backups before modifying files. RISKY.
+  --min-folder-size SIZE    Min total size of a subfolder for processing (e.g., 10MB). Encryption only.
+  --max-file-size SIZE      Skip individual files larger than this size (e.g., 100MB). Encryption only.
+  --workers WORKERS         Number of worker threads (default: 2).
+  -q, --quiet               Suppress console output (logs are still written to file).
+  --restore-from-backup     Special mode: attempts to restore the target folder from existing backups.
+  -v, --version             show program's version number and exit
 ```
+
 
 ## Dependencies
 
