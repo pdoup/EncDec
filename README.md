@@ -1,6 +1,6 @@
 # Folder Encryptor/Decryptor Tool
 
-A command-line utility for encrypting and decrypting the contents of entire folders. This tool provides strong file and filename encryption.
+A command-line utility for encrypting and decrypting the contents of entire folders.
 
 ## :warning: **EXTREME CAUTION ADVISED** :warning:
 
