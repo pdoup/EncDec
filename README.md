@@ -47,7 +47,9 @@ A command-line utility for encrypting and decrypting the contents of entire fold
 
 Inside the root project folder, run:
 
-`python -m build -w`
+```bash
+python -m build -w
+```
 
 The command generates a `.whl` file in the `dist/` directory.
 
