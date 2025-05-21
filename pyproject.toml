@@ -1,0 +1,47 @@
+# pyproject.toml
+
+[build-system]
+requires = [
+    "setuptools", # Using setuptools as the build backend
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "folder-encdec-tool"
+version = "1.0.0"
+authors = [
+  { name="PD" },
+]
+description = "A tool to securely encrypt and decrypt folder contents with filename obfuscation and concurrency."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT License" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Utilities",
+    "Environment :: Console",
+]
+keywords = ["encryption", "decryption", "security", "crypto", "files", "folder", "cli"]
+
+dependencies = [
+    "cryptography",
+    "cachetools",
+]
+
+[project.urls]
+# Homepage = "https://github.com/tbd"
+
+[project.scripts]
+folder-encryptor = "folder_encryptor.main:run_main"

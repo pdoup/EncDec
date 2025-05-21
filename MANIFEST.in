@@ -1,0 +1,9 @@
+# MANIFEST.in
+
+# Include the README
+include README.md
+
+graft src/folder_encryptor/lib
+
+global-exclude __pycache__
+global-exclude *.py[co]
