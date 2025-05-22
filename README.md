@@ -76,7 +76,8 @@ folder-encryptor "/path/to/your/folder" decrypt --key "my_secret.key"
 
 # View all options
 folder-encryptor --help
-
+```
+```txt
 # Output
 usage: FolderEncryptor [-h] [--key KEY] [--exclude EXCLUDE] [--no-purge-after-decrypt] [--no-backup] [--min-folder-size SIZE]
                        [--max-file-size SIZE] [--workers WORKERS] [-q] [--restore-from-backup] [-v]
