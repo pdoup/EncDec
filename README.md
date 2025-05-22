@@ -82,7 +82,7 @@ usage: FolderEncryptor [-h] [--key KEY] [--exclude EXCLUDE] [--no-purge-after-de
                        [--max-file-size SIZE] [--workers WORKERS] [-q] [--restore-from-backup] [-v]
                        folder {encrypt,decrypt}
 
-Securely encrypts or decrypts a folder's contents.
+Securely encrypts or decrypts a folders contents.
 
 positional arguments:
   folder                    Target folder for encryption or decryption.
