@@ -18,7 +18,7 @@ DEFAULT_KEY_FILENAME: str = "secret.key"
 LOG_FILE_BASENAME: str = "folder_encryptor"
 LOG_FILE_TIMESTAMP_FORMAT: str = "%Y%m%d_%H%M%S"
 LOG_FORMAT: str = (
-    "%(asctime)s - %(levelname)s - %(threadName)s - (%(funcName)s.%(lineno)s): %(message)s"
+    "%(asctime)s.%(msecs)d - %(levelname)s - %(threadName)s - (%(funcName)s.%(lineno)s): %(message)s"
 )
 LOG_DATE_FORMAT: str = "%d-%b-%y %H:%M:%S"
 

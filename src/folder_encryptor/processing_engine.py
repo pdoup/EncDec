@@ -127,6 +127,17 @@ def _worker_encrypt_file(
             original_file_path=file_to_process,
             error_details=str(e),
         )
+    except ValueError as e:
+        logging.error(
+            f"Error in encryption worker for {file_to_process.name}: {e}",
+            exc_info=True,
+            extra=dict(type_=e.__class__.__name__),
+        )
+        return WorkerEncryptResult(
+            status="error",
+            original_file_path=file_to_process,
+            error_details=f"Possible subpath processing error detected: {e}",
+        )
     except Exception as e:  # Catch-all for unexpected
         logging.critical(
             f"Unexpected critical error in encryption worker for {file_to_process.name}: {e}",

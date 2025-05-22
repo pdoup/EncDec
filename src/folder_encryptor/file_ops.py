@@ -175,6 +175,7 @@ def restore_all_from_run_backup(target_folder: Path, console_print_func=print) -
     backup_map_json_path = backup_run_root / BACKUP_MAPPING_FILENAME
 
     total_restored_files = 0
+    total_hashed_deleted = 0
 
     logging.info(
         f"Attempting full restore for '{target_folder.name}' from backup at '{backup_run_root}'"
@@ -221,24 +222,54 @@ def restore_all_from_run_backup(target_folder: Path, console_print_func=print) -
             console_print_func(
                 f"[!] Error loading backup map {backup_map_json_path.name}: {e}"
             )
+    else:
+        logging.warning(
+            f"Backup JSON file {backup_map_json_path.name} not present in backup folder"
+        )
 
     if original_names_map:
         # Iterate through files currently in the target_folder (potentially with hashed names)
-        files_in_target = list(target_folder.rglob("*"))  # Materialize once
-        for current_file_path in files_in_target:
+        for current_file_path in target_folder.rglob("*"):
             if current_file_path.is_file():
-                logging.warning(
-                    "Filename restoration in restore_all_from_run_backup currently relies on content restoration only."
-                )
-                console_print_func(
-                    "[*] Content restoration from backup is complete. Filename restoration requires a valid main mapping file for decryption."
-                )
+                hashed_name = current_file_path.name
+                if hashed_name in original_names_map:
+                    original_relative_str = original_names_map[hashed_name]
+                    original_full_path = target_folder.joinpath(original_relative_str)
+                    try:
+                        if current_file_path != original_full_path:
+                            current_file_path.unlink()
+                            total_hashed_deleted += 1
+                            logging.info(
+                                f"Deleted hashed version '{hashed_name[:10]}...' of '{original_relative_str}'"
+                            )
+                    except (OSError, PermissionError) as e:
+                        console_print_func(
+                            f"[!] Failed to delete hashed version of {original_full_path}: {e}"
+                        )
+
+                        logging.error(
+                            f"[!] Failed to delete hashed version of {original_full_path}: {e}"
+                        )
+                    except Exception as e:
+                        logging.error(
+                            f"Unexpected error during deleting hashed version of {original_full_path}: {e}",
+                            exc_info=True,
+                        )
+    else:
+        logging.warning(
+            "Filename restoration in restore_all_from_run_backup currently relies on content restoration only."
+        )
+        console_print_func(
+            "[*] Content restoration from backup is complete. Filename restoration requires a valid main mapping file for decryption."
+        )
 
     console_print_func(
         f"[+] Restore attempt: {total_restored_files} file contents copied from backup."
     )
-    if total_restored_files == 0 and not (
-        backup_run_root.exists() and any(backup_run_root.iterdir())
+    if (
+        total_restored_files == 0
+        and total_hashed_deleted == 0
+        and not (backup_run_root.exists() and any(backup_run_root.iterdir()))
     ):
         console_print_func(f"[!] No backup data found in {backup_run_root} to restore.")
 

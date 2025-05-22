@@ -4,12 +4,11 @@ Main command-line interface for the Folder Encryptor application.
 """
 import argparse
 import base64
-import builtins
 import logging
 import re
 from pathlib import Path
 from pprint import pformat
-from typing import Callable, Set
+from typing import Set
 
 from cryptography.fernet import Fernet
 
@@ -20,6 +19,7 @@ from .file_ops import delete_old_log_files, restore_all_from_run_backup
 from .logger_config import setup_logging
 from .models import ProcessResult
 from .processing_engine import process_folder
+from .utils import PrintToggler
 
 __version__ = "1.0.0"
 
@@ -101,7 +101,7 @@ def run_main():
         "-q",
         "--quiet",
         action="store_true",
-        help="Suppress console output (logs are still written to file).",
+        help="Suppress verbose console output(logs are still written to file).",
     )
     parser.add_argument(
         "--restore-from-backup",
@@ -118,15 +118,11 @@ def run_main():
     # --- Setup ---
     log_file_abs_path = setup_logging()
 
-    # Handle quiet mode by replacing builtins.print
-    original_print_func: Callable = builtins.print
-    console_printer: Callable = original_print_func
-    if args.quiet:
-        console_printer = lambda *a, **kw: None  # type: ignore
-        builtins.print = console_printer
+    pt = PrintToggler()
+    pt.toggle_quiet(args.quiet)
 
     try:
-        delete_old_log_files(console_printer, log_file_abs_path)
+        delete_old_log_files(pt.console_printer, log_file_abs_path)
     except Exception as e:
         logging.warning(f"Could not complete deletion of old log files: {e}")
 
@@ -145,10 +141,10 @@ def run_main():
             )
 
         if args.restore_mode:
-            console_printer(f"[*] Entering restore mode for folder: {target_folder}")
+            pt.console_printer(f"[*] Entering restore mode for folder: {target_folder}")
             logging.info(f"Restore mode activated for {target_folder}.")
-            restore_all_from_run_backup(target_folder, console_printer)
-            console_printer("[*] Restore attempt finished. Check logs for details.")
+            restore_all_from_run_backup(target_folder, pt.console_printer)
+            pt.console_printer("[*] Restore attempt finished. Check logs for details.")
             logging.info("--- Restore mode finished ---")
             return
 
@@ -187,7 +183,7 @@ def run_main():
             min_folder_size_bytes=min_f_size,
             max_file_size_bytes=max_f_size,
             num_workers=args.workers,
-            console_print_func=console_printer,
+            console_print_func=pt.console_printer,
         )
 
     except FolderEncryptorError as e:
@@ -204,22 +200,22 @@ def run_main():
             success=False,
             fatal_error=f"Unexpected: {e}",
         )
-
+        pt.toggle_quiet(False)
         # Attempt rollback for encryption if backups were on and error is critical
         if "args" in locals() and args.mode == "encrypt" and args.create_backup:
-            console_printer(
+            pt.console_printer(
                 "[!] Critical error during encryption. Attempting to restore from backups..."
             )
             logging.warning(
                 "Critical error during encryption, attempting restore_all_from_run_backup."
             )
             try:
-                restore_all_from_run_backup(target_folder, console_printer)
-                console_printer(
+                restore_all_from_run_backup(target_folder, pt.console_printer)
+                pt.console_printer(
                     "[!] Restore attempt finished. Please check the target folder and logs carefully."
                 )
             except Exception as restore_ex:
-                console_printer(
+                pt.console_printer(
                     f"[!!!] Restore attempt FAILED: {restore_ex}. Manual check required."
                 )
                 logging.critical(
@@ -227,13 +223,11 @@ def run_main():
                     exc_info=True,
                 )
         elif "args" in locals() and args.mode == "encrypt" and not args.create_backup:
-            console_printer(
+            pt.console_printer(
                 "[!] Critical error during encryption and backups were OFF. Manual recovery may be needed."
             )
 
-    if args.quiet:
-        builtins.print = original_print_func
-        console_printer = builtins.print
+    pt.toggle_quiet(False)
     # --- Final Summary ---
     if operation_result.success:
         summary = (
@@ -249,13 +243,13 @@ def run_main():
             summary += f"  Files skipped (permissions/map issues): {operation_result.total_skipped_permissions}\n"
         if operation_result.file_operation_errors > 0:
             summary += f"  File operations with non-fatal errors: {operation_result.file_operation_errors}\n"
-        console_printer(summary)
+        pt.console_printer(summary)
     else:
-        console_printer(f"[!!!] {operation_result.method.capitalize()}ion FAILED.")
+        pt.console_printer(f"[!!!] {operation_result.method.capitalize()}ion FAILED.")
         if operation_result.fatal_error:
-            console_printer(f"  Fatal Error: {operation_result.fatal_error}")
+            pt.console_printer(f"  Fatal Error: {operation_result.fatal_error}")
 
-    console_printer(
+    pt.console_printer(
         f"[*] Log file: {log_file_abs_path.name if log_file_abs_path else 'N/A'}"
     )
     logging.info(f"--- {parser.prog} finished ---")
